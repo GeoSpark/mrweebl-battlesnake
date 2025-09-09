@@ -1,5 +1,7 @@
+import json
 import typing
 
+from neighbours import game_state_example, get_graph
 from snake_astar import SnakeAStar
 
 
@@ -20,7 +22,9 @@ def move(game_state: typing.Dict, graph: list) -> typing.Dict:
     if path is None:
         return {"move": "up"}
 
-    node = list(path)[0]
+    # The first node is the head, so we skip it.
+    foo = list(path)
+    node = foo[1]
 
     if node[0] < head[0]:
         return {"move": "left"}
@@ -32,3 +36,12 @@ def move(game_state: typing.Dict, graph: list) -> typing.Dict:
         return {"move": "up"}
 
     return {"move": "up"}
+
+
+
+if __name__ == "__main__":
+    game_state = json.loads(game_state_example)
+
+    graph = get_graph(game_state)
+    m = move(game_state, graph)
+    print(m)
