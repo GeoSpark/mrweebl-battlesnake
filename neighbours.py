@@ -98,6 +98,10 @@ def get_occupied(game_state):
             result += [(cell["y"], cell["x"])]
     return result
 
+def get_food(game_state):
+    return [(cell["y"], cell["x"]) for cell in game_state["board"]["food"]]
+    
+    
 def get_neighbours(id : (int, int), game_state):
     grid_size_x = game_state["board"]["width"]
     grid_size_y = game_state["board"]["height"]
@@ -108,10 +112,20 @@ def get_neighbours(id : (int, int), game_state):
     neighbours = [(i, j) for (i, j) in neighbours if i>=0 and i < grid_size_y and j>=0 and j<grid_size_x]
     neighbours = [e for e in neighbours if e not in occupied_cells]
     return neighbours
-    
+
+def get_graph(game_state):
+    grid_size_x = game_state["board"]["width"]
+    grid_size_y = game_state["board"]["height"]
+    result = {}
+    for i in range(grid_size_y):
+        for j in range(grid_size_x):
+            result[(i, j)] = get_neighbours((i,j), game_state)
+    return result
 
 
 if __name__ == "__main__":
     game_state = json.loads(game_state_example)
-    print(get_neighbours((4, 6), game_state))
-    print(get_occupied(game_state))
+    #print(get_neighbours((4, 6), game_state))
+    #print(get_occupied(game_state))
+    #print(get_food(game_state))
+    print(get_graph(game_state))
