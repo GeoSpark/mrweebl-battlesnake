@@ -95,21 +95,21 @@ def get_occupied(game_state):
     result = []
     for snake in game_state["board"]["snakes"]:
         for cell in snake["body"]:
-            result += [(cell["y"], cell["x"])]
+            result += [(cell["x"], cell["y"])]
     return result
 
 def get_food(game_state):
-    return [(cell["y"], cell["x"]) for cell in game_state["board"]["food"]]
+    return [(cell["x"], cell["x"]) for cell in game_state["board"]["food"]]
     
     
 def get_neighbours(id : (int, int), game_state):
-    grid_size_x = game_state["board"]["width"]
-    grid_size_y = game_state["board"]["height"]
+    grid_size_y = game_state["board"]["width"]
+    grid_size_x = game_state["board"]["height"]
     occupied_cells = get_occupied(game_state)
-    (row_in, column_in) = id
+    (column_in, row_in) = id
     offsets = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-    neighbours = [(row_in+o_i, column_in+o_j) for (o_i, o_j) in offsets]
-    neighbours = [(i, j) for (i, j) in neighbours if i>=0 and i < grid_size_y and j>=0 and j<grid_size_x]
+    neighbours = [(column_in+o_i, row_in+o_j) for (o_i, o_j) in offsets]
+    neighbours = [(i, j) for (i, j) in neighbours if i>=0 and i < grid_size_x and j>=0 and j<grid_size_y]
     neighbours = [e for e in neighbours if e not in occupied_cells]
     return neighbours
 
@@ -117,15 +117,15 @@ def get_graph(game_state):
     grid_size_x = game_state["board"]["width"]
     grid_size_y = game_state["board"]["height"]
     result = {}
-    for i in range(grid_size_y):
-        for j in range(grid_size_x):
+    for i in range(grid_size_x):
+        for j in range(grid_size_y):
             result[(i, j)] = get_neighbours((i,j), game_state)
     return result
 
 
 if __name__ == "__main__":
     game_state = json.loads(game_state_example)
-    #print(get_neighbours((4, 6), game_state))
-    #print(get_occupied(game_state))
+    print(get_neighbours((4, 6), game_state))
+    print(get_occupied(game_state))
     #print(get_food(game_state))
-    print(get_graph(game_state))
+    #print(get_graph(game_state))
