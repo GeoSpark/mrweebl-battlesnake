@@ -24,7 +24,11 @@ def move_astar(game_state: typing.Dict, graph: list) -> typing.Dict:
 
     # The first node is the head, so we skip it.
     foo = list(path)
-    node = foo[1]
+    # We are next to the food, so just move there.
+    if len(foo) == 1:
+        node = goal
+    else:
+        node = foo[1]
 
     if node[0] < head[0]:
         return {"move": "left"}
