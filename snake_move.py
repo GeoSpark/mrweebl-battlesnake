@@ -5,7 +5,7 @@ from neighbours import game_state_example, get_graph
 from snake_astar import SnakeAStar
 
 
-def move(game_state: typing.Dict, graph: list) -> typing.Dict:
+def move_astar(game_state: typing.Dict, graph: list) -> typing.Dict:
     # Aim for the first food in the list.
     goal = game_state['board']['food']
 
@@ -35,7 +35,7 @@ def move(game_state: typing.Dict, graph: list) -> typing.Dict:
     elif node[1] > head[1]:
         return {"move": "up"}
 
-    return {"move": "up"}
+    return {"move": "up", "shout": "Badger, badger, badger, mushroom!"}
 
 
 
