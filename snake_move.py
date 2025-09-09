@@ -43,5 +43,5 @@ if __name__ == "__main__":
     game_state = json.loads(game_state_example)
 
     graph = get_graph(game_state)
-    m = move(game_state, graph)
+    m = move_astar(game_state, graph)
     print(m)

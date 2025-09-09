@@ -13,6 +13,7 @@
 import random
 import typing
 
+from neighbours import get_graph
 from snake_move import move_astar
 
 
@@ -39,6 +40,12 @@ def start(game_state: typing.Dict):
 # end is called when your Battlesnake finishes a game
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
+
+def move(game_state: typing.Dict) -> typing.Dict:
+    graph = get_graph(game_state)
+    m = move_astar(game_state, graph)
+
+    return m
 
 
 # move is called on every turn and returns your next move
@@ -98,4 +105,4 @@ def move_random(game_state: typing.Dict) -> typing.Dict:
 if __name__ == "__main__":
     from server import run_server
 
-    run_server({"info": info, "start": start, "move": move_astar, "end": end})
+    run_server({"info": info, "start": start, "move": move, "end": end})
