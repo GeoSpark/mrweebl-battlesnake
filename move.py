@@ -1,18 +1,20 @@
-from neighbours import get_neighbours, get_food
+from graph import get_neighbours, get_food
 from snake_astar import SnakeAStar
-from utils import manhattan_distance
+from utils import manhattan_distance, Point, MoveResponse
 
 
-def move_astar(game_state: dict, graph: list) -> dict:
+def move_astar(game_state: dict, graph: dict[Point, list[Point]]) -> MoveResponse:
     foods = get_food(game_state)
-    head = (game_state["you"]["head"]["x"], game_state["you"]["head"]["y"])
+    head = Point(game_state["you"]["head"]["x"], game_state["you"]["head"]["y"])
     neighbours = get_neighbours(head, game_state)
 
     if len(neighbours) == 0:
-        return {"move": "up", "shout": "Oh bugger."}
+        return MoveResponse(move="up", shout="Oh bugger.")
 
-    goals = sorted(foods, key=lambda x: manhattan_distance(x, head))
+    # Seek the nearest food first, otherwise the first neighbour.
+    goals = sorted(foods, key=lambda food: manhattan_distance(food, head))
     goals.append(neighbours[0])
+    # print(f"Head: {head} Goals: {goals}")
     path = None
     goal = None
 
@@ -33,15 +35,15 @@ def move_astar(game_state: dict, graph: list) -> dict:
 
     move = build_move(head, path[0])
 
-    return {"move": move, "shout": "Badger, badger, badger, mushroom!"}
+    return MoveResponse(move=move, shout="Badger, badger, badger, mushroom!")
 
 
-def build_move(head: tuple[int, int], node: tuple[int, int]):
-    if node[0] < head[0]:
+def build_move(head: Point, node: Point):
+    if node.x < head.x:
         move = "left"
-    elif node[0] > head[0]:
+    elif node.x > head.x:
         move = "right"
-    elif node[1] < head[1]:
+    elif node.y < head.y:
         move = "down"
     else:
         move = "up"
