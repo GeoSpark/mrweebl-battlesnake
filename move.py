@@ -9,8 +9,15 @@ def move_astar(game_state: dict, graph: dict[Point, list[Point]]) -> MoveRespons
     neighbours = get_neighbours(head, game_state)
 
     if len(neighbours) == 0:
-        return MoveResponse(move="up", shout="Oh bugger.")
+        neighbours = get_neighbours(head, game_state, ignore_halo=True)
 
+        if len(neighbours) == 0:
+            return MoveResponse(move="up", shout="Oh bugger.")
+        else:
+            return MoveResponse(move=build_move(head, neighbours[0]), shout="Better than nothing.")
+
+    # TODO: If an enemy snake is closer to the food, choose another.
+    # TODO: If there's no other way out, find the largest subgraph and pick a point there.
     # Seek the nearest food first, otherwise the first neighbour.
     goals = sorted(foods, key=lambda food: manhattan_distance(food, head))
     goals.append(neighbours[0])

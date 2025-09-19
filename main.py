@@ -14,7 +14,6 @@ from dataclasses import asdict
 from graph import get_graph
 from move import move_astar
 
-
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
 # TIP: If you open your Battlesnake URL in a browser you should see this data
