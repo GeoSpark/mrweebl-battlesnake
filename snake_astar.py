@@ -1,6 +1,6 @@
 from astar import AStar
 
-
+from utils import manhattan_distance
 
 BOARD_WEIGHT_EMPTY = 1
 BOARD_WEIGHT_FOOD = 1
@@ -18,11 +18,10 @@ class SnakeAStar(AStar):
             yield n1
 
     def distance_between(self, n1, n2):
-        # Manhatten distance
-        return abs(n1[0] - n2[0]) + abs(n1[1] - n2[1])
-
-    def heuristic_cost_estimate(self, current, goal):
         return 1
 
+    def heuristic_cost_estimate(self, current, goal) -> float:
+        return manhattan_distance(current, goal)
+
     def is_goal_reached(self, current, goal):
-        return current[0] == goal[0]
+        return current == goal

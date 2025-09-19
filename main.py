@@ -25,10 +25,10 @@ def info() -> typing.Dict:
 
     return {
         "apiversion": "1",
-        "author": "Team 5",
-        "color": "#888888",  # TODO: Choose color
-        "head": "do-sammy",  # TODO: Choose head
-        "tail": "dragon",  # TODO: Choose tail
+        "author": "JD",
+        "color": "#8600b3",
+        "head": "all-seeing",
+        "tail": "freckled",
     }
 
 
@@ -40,6 +40,7 @@ def start(game_state: typing.Dict):
 # end is called when your Battlesnake finishes a game
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
+
 
 def move(game_state: typing.Dict) -> typing.Dict:
     graph = get_graph(game_state)
