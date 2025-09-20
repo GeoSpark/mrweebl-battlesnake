@@ -20,23 +20,19 @@ def move_astar(game_state: dict, graph: dict[Point, list[Point]]) -> MoveRespons
     # Seek the nearest food first, otherwise the first neighbour.
     goals = sorted(foods, key=lambda food: manhattan_distance(food, head))
     # print(f"Head: {head} Goals: {goals}")
-    path = None
-    # TODO: Pick a better last-resort neighbour.
-    goal = neighbours[0]
+    # TODO: Pick a better last-resort goal.
+    path = [neighbours[0]]
+    a_star = SnakeAStar(graph)
 
     for g in goals:
-        path = SnakeAStar(graph).astar(head, g)
+        p = a_star.astar(head, g)
 
-        if path is not None:
-            goal = g
+        if p is not None:
+            # The first node is the head, so we skip it.
+            path = list(p)[1:]
+            # The path doesn't include the goal.
+            path.append(g)
             break
-
-    if path is not None:
-        # The first node is the head, so we skip it.
-        path = list(path)[1:]
-        path.append(goal)
-    else:
-        path = [goal]
 
     move = build_move(head, path[0])
 

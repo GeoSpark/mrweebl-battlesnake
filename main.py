@@ -19,8 +19,6 @@ from move import move_astar
 # and controls your Battlesnake's appearance
 # TIP: If you open your Battlesnake URL in a browser you should see this data
 def info() -> dict:
-    print("INFO")
-
     return {
         "apiversion": "1",
         "author": "JD",
@@ -32,12 +30,14 @@ def info() -> dict:
 
 # start is called when your Battlesnake begins a game
 def start(game_state: dict) -> None:
-    print("GAME START")
+    name = game_state["you"]["name"]
+    print(f"Game start {name}")
 
 
 # end is called when your Battlesnake finishes a game
 def end(game_state: dict) -> None:
-    print("GAME OVER\n")
+    name = game_state["you"]["name"]
+    print(f"Game over {name}")
 
 
 def move(game_state: dict) -> dict:
