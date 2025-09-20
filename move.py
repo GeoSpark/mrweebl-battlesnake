@@ -13,17 +13,16 @@ def move_astar(game_state: dict, graph: dict[Point, list[Point]]) -> MoveRespons
 
         if len(neighbours) == 0:
             return MoveResponse(move="up", shout="Oh bugger.")
-        else:
-            return MoveResponse(move=build_move(head, neighbours[0]), shout="Better than nothing.")
 
     # TODO: If an enemy snake is closer to the food, choose another.
+    # TODO: If the food has zero or one neighbour, choose another.
     # TODO: If there's no other way out, find the largest subgraph and pick a point there.
     # Seek the nearest food first, otherwise the first neighbour.
     goals = sorted(foods, key=lambda food: manhattan_distance(food, head))
-    goals.append(neighbours[0])
     # print(f"Head: {head} Goals: {goals}")
     path = None
-    goal = None
+    # TODO: Pick a better last-resort neighbour.
+    goal = neighbours[0]
 
     for g in goals:
         path = SnakeAStar(graph).astar(head, g)
@@ -32,13 +31,12 @@ def move_astar(game_state: dict, graph: dict[Point, list[Point]]) -> MoveRespons
             goal = g
             break
 
-    if goal is None or path is None:
-        # We shouldn't get here because we'll always have at least a neighbour.
-        raise NotImplementedError()
-
-    # The first node is the head, so we skip it.
-    path = list(path)[1:]
-    path.append(goal)
+    if path is not None:
+        # The first node is the head, so we skip it.
+        path = list(path)[1:]
+        path.append(goal)
+    else:
+        path = [goal]
 
     move = build_move(head, path[0])
 

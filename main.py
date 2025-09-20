@@ -9,6 +9,7 @@
 #
 # To get you started we've included code to prevent your Battlesnake from moving backwards.
 # For more info see docs.battlesnake.com
+import random
 from dataclasses import asdict
 
 from graph import get_graph
@@ -23,7 +24,7 @@ def info() -> dict:
     return {
         "apiversion": "1",
         "author": "JD",
-        "color": "#8600b3",
+        "color": f"#{random.randint(0, 0xFFFFFF):06x}",  # "#8600b3",
         "head": "all-seeing",
         "tail": "freckled",
     }
