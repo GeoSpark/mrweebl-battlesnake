@@ -3,6 +3,34 @@ from utils import Point
 offsets = [Point(0, -1), Point(0, 1), Point(-1, 0), Point(1, 0)]
 
 
+def get_heads(game_state: dict) -> list[Point]:
+    result = list()
+    my_id = game_state["you"]["id"]
+
+    # Avoid all bodies.
+    for snake in game_state["board"]["snakes"]:
+        if snake["id"] != my_id:
+            result.append(Point(snake["head"]["x"], snake["head"]["y"]))
+
+    return result
+
+
+def get_lengths(game_state: dict) -> list[int]:
+    result = list()
+    my_id = game_state["you"]["id"]
+
+    # Avoid all bodies.
+    for snake in game_state["board"]["snakes"]:
+        if snake["id"] != my_id:
+            result.append(snake["length"])
+
+    # For some reason we occasionally get no opponents, so we add a dummy of length 1.
+    if len(result) == 0:
+        result.append(1)
+
+    return result
+
+
 def get_occupied(game_state: dict, ignore_halo) -> set[Point]:
     result = set()
     my_id = game_state["you"]["id"]
@@ -18,6 +46,8 @@ def get_occupied(game_state: dict, ignore_halo) -> set[Point]:
             result.add(Point(snake["head"]["x"], snake["head"]["y"]) + offsets[1])
             result.add(Point(snake["head"]["x"], snake["head"]["y"]) + offsets[2])
             result.add(Point(snake["head"]["x"], snake["head"]["y"]) + offsets[3])
+
+    result.remove(Point(game_state["you"]["head"]["x"], game_state["you"]["head"]["y"]))
 
     return result
 

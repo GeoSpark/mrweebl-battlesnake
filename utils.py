@@ -1,10 +1,29 @@
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Point:
     x: int
     y: int
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __eq__(self, other):
+        if isinstance(other, Point):
+            return (self.x, self.y) == (other.x, other.y)
+        if isinstance(other, tuple) and len(other) == 2:
+            return (self.x, self.y) == other
+        return NotImplemented
+
+    def __iter__(self):
+        yield self.x; yield self.y
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, i):
+        return (self.x, self.y)[i]
 
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y)

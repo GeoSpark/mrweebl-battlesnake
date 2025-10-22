@@ -12,8 +12,8 @@
 import random
 from dataclasses import asdict
 
-from graph import get_graph
-from move import move_astar
+from move import choose_move
+
 
 # info is called when you create your Battlesnake on play.battlesnake.com
 # and controls your Battlesnake's appearance
@@ -41,8 +41,7 @@ def end(game_state: dict) -> None:
 
 
 def move(game_state: dict) -> dict:
-    graph = get_graph(game_state)
-    m = move_astar(game_state, graph)
+    m = choose_move(game_state)
 
     return asdict(m)
 
