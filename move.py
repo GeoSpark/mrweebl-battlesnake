@@ -27,8 +27,13 @@ def choose_move(game_state: dict):
     my_length = game_state["you"]["length"]
     turn = game_state["turn"]
 
-    # should_eat = (my_length <= their_length) or (my_health < 50)
-    should_eat = my_health < 70
+    # Because we have some agressive opponents, allow for potential head-to-heads by
+    # ensuring we're at least as long as the opponent. If we are longer and there is a
+    # cell we're both likely to go for, choose it so we win any head-to-heads.
+    should_eat = (my_length <= their_length) or (my_health < 30)
+    # This is a bit of a risk because head-to-heads of equal-length snakes causes
+    # both to be eliminated.
+    threat_radius = 2 if (my_length < their_length) else 0
 
     # print(f"{turn} - ", end="")
 
@@ -40,7 +45,8 @@ def choose_move(game_state: dict):
         food_cells,
         should_eat,
         opponent_head=None if len(heads) == 0 else heads[0],
-        threat_radius=5,
+        opponent_length=their_length,
+        threat_radius=threat_radius,
     )
 
     if dest is not None:

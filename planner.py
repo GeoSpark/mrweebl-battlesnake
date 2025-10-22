@@ -111,6 +111,86 @@ def hazard_cells(width: int, height: int, my_head: Coord, opp_head: Optional[Coo
     return {opp_head, *neighbours4(opp_head, width, height)}
 
 
+# Agression
+def space_delta_choice(
+    width, height,
+    head, opponent_head,
+    blocked_now, candidates,
+    w_opp=1.3,
+    free_tail: tuple[int,int] | None = None,  # if your tail will vacate
+):
+    if not candidates:
+        return None
+
+    def comp_size_after_move(next_head):
+        # Build open graph AFTER we move to next_head (i.e. that cell becomes blocked)
+        blocked_after = set(blocked_now)
+        if free_tail is not None:
+            blocked_after.discard(free_tail)
+        blocked_after.add(next_head)
+
+        G2 = nx.grid_2d_graph(width, height)
+        blocked_copy = blocked_after.copy()
+        # Keep heads present so BFS starts exist
+        blocked_copy.discard(next_head)
+        if opponent_head is not None:
+            blocked_copy.discard(opponent_head)
+        G2.remove_nodes_from([b for b in blocked_copy if b in G2])
+
+        # our space
+        our = 0
+        if next_head in G2:
+            comp = next(c for c in nx.connected_components(G2) if next_head in c)
+            our = len(comp)
+
+        # opponent space
+        opp = 0
+        if opponent_head is not None and opponent_head in G2:
+            comp = next(c for c in nx.connected_components(G2) if opponent_head in c)
+            opp = len(comp)
+
+        return our, opp
+
+    best_n, best_score = None, float("-inf")
+    for n in candidates:
+        our, opp = comp_size_after_move(n)
+        score = our - w_opp * opp
+        if score > best_score:
+            best_score, best_n = score, n
+    return best_n
+
+
+def trap_door_target(H, head, opponent_head, opp_len, small_limit_extra=3):
+    if opponent_head is None or head not in H or opponent_head not in H:
+        return None
+
+    you_d = nx.single_source_shortest_path_length(H, head)
+    opp_d = nx.single_source_shortest_path_length(H, opponent_head)
+
+    best_v, best_d = None, float("inf")
+    for v in nx.articulation_points(H):
+        dy, do = you_d.get(v), opp_d.get(v)
+        if dy is None or do is None:
+            continue
+        if dy >= do:        # you don't win the door race
+            continue
+
+        # Remove door and see how big the opponent-side becomes
+        H2 = H.copy()
+        H2.remove_node(v)
+        if opponent_head not in H2:
+            opp_side = 0
+        else:
+            comp = next(c for c in nx.connected_components(H2) if opponent_head in c)
+            opp_side = len(comp)
+
+        if opp_side < (opp_len + small_limit_extra) and dy < best_d:
+            best_d, best_v = dy, v
+
+    return best_v  # None if no good trap
+
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Public API
 # ──────────────────────────────────────────────────────────────────────────────
@@ -124,6 +204,7 @@ def choose_next_step(
     foods: Iterable[Coord],
     hungry: bool,
     opponent_head: Optional[Coord] = None,
+    opponent_length: int = 1,
     threat_radius: int = 3,
     rnd: random.Random = random,
 ) -> Optional[Coord]:
@@ -145,7 +226,7 @@ def choose_next_step(
     # Avoid opponent's immediate reach if close
     hazards = hazard_cells(width, height, head, opponent_head, threat_radius)
     safe_legal = [n for n in legal if n not in hazards] or legal  # fall back if all hazardous
-
+    # safe_legal = legal
     # Directional spaces (with head removed)
     size_by_n, area_by_n = directional_spaces(H, head)
     if not size_by_n:  # degenerate: just move safely
@@ -221,6 +302,27 @@ def choose_next_step(
                     return best_dir
         # If no food lies in the largest area(s), we fall through to the non-hungry logic.
 
+
+    # 2a) Door trap (if opponent present). Try once; if we get a target, step toward it.
+    if opponent_head is not None:
+        door = trap_door_target(H, head, opponent_head, opp_len=opponent_length)  # you have this value in your state
+        if door is not None:
+            # step toward door, preferring a safe first step
+            try:
+                path = nx.shortest_path(H, head, door)
+                if len(path) >= 2 and path[1] in safe_legal:
+                    return path[1]
+            except nx.NetworkXNoPath:
+                pass
+            # fallback: the safe neighbour that gets closest to the door
+            try:
+                dist_to_door = nx.single_source_shortest_path_length(H, door)
+                cand = [n for n in safe_legal if n in dist_to_door]
+                if cand:
+                    return min(cand, key=lambda n: dist_to_door[n])
+            except nx.NetworkXError:
+                pass
+
     # ── Not hungry (or hungry but no food in largest area): go to centre of largest area
     centre1 = area_centre(best["area"])
     if centre1 is not None and head != centre1:
@@ -238,6 +340,20 @@ def choose_next_step(
             if step is not None:
                 return step
         # If stepping along the exact path is blocked by hazards, we’ll drop to the local rule below.
+
+    # 2c) If you still have multiple equivalent candidates (or as a general tie-breaker),
+    #     pick the move that maximizes our_space - 1.3*opp_space after we move.
+    step = space_delta_choice(
+        width, height,
+        head=head,
+        opponent_head=opponent_head,
+        blocked_now=set(blocked),
+        candidates=safe_legal,
+        w_opp=1.3,
+        free_tail=None,  # or your tail if you know it will vacate
+    )
+    if step is not None:
+        return step
 
     # No second area (or couldn’t step safely): pick neighbour with highest local degree
     # in H with head removed (keeps options); tie-break by distance from opponent head.
