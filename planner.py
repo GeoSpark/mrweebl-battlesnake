@@ -349,7 +349,7 @@ def choose_next_step(
         opponent_head=opponent_head,
         blocked_now=set(blocked),
         candidates=safe_legal,
-        w_opp=1.3,
+        w_opp=1.5,
         free_tail=None,  # or your tail if you know it will vacate
     )
     if step is not None:
