@@ -25,6 +25,7 @@ def info() -> dict:
         "color": f"#{random.randint(0, 0xFFFFFF):06x}",  # "#8600b3",
         "head": "all-seeing",
         "tail": "freckled",
+        "version": "2.0"
     }
 
 
